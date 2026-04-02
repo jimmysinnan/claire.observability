@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Mira | Product Tour{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <p class="eyebrow">Product Tour</p>
+  <h1>From telemetry to trust in 3 steps</h1>
+</section>
+
+<section class="steps">
+  {% for step in steps %}
+  <article class="card">
+    <h3>{{ loop.index }}. {{ step.title }}</h3>
+    <p>{{ step.description }}</p>
+  </article>
+  {% endfor %}
+</section>
+<div class="center">
+  <a class="btn" href="/demo">Start your conversion journey</a>
+</div>
+{% endblock %}
