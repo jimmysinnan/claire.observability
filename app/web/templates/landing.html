@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Mira | AI Reliability{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">AI Observability Platform</p>
+  <h1>{{ hero_title }}</h1>
+  <p class="subtitle">{{ hero_subtitle }}</p>
+  <div class="cta-row">
+    <a class="btn" href="/demo">{{ cta_primary }}</a>
+    <a class="btn btn-ghost" href="/tour">{{ cta_secondary }}</a>
+  </div>
+</section>
+
+<section class="metrics-grid">
+  <article class="card">
+    <h3>Total events</h3>
+    <p>{{ metrics.total_events }}</p>
+  </article>
+  <article class="card">
+    <h3>Anomalies detected</h3>
+    <p>{{ metrics.anomalies_detected }}</p>
+  </article>
+  <article class="card">
+    <h3>Rules monitored</h3>
+    <p>{{ metrics.anomalies_by_rule | length }}</p>
+  </article>
+</section>
+
+<section class="proof">
+  <h2>Purpose-built for e-commerce AI teams</h2>
+  <ul>
+    <li>Trace prompts and recommendations end-to-end.</li>
+    <li>Prevent revenue leakage with anomaly rules.</li>
+    <li>Convert alerts to decisions faster with guided triage UX.</li>
+  </ul>
+</section>
+{% endblock %}
