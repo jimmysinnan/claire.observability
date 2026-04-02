@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Mira | Reliability Dashboard{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <p class="eyebrow">Operational cockpit</p>
+  <h1>Reliability Dashboard</h1>
+</section>
+
+<section class="metrics-grid">
+  <article class="card"><h3>Events</h3><p>{{ snapshot.total_events }}</p></article>
+  <article class="card"><h3>Anomalies</h3><p>{{ snapshot.anomalies_detected }}</p></article>
+  <article class="card"><h3>Anomaly rate</h3><p>{{ anomaly_rate }}%</p></article>
+</section>
+
+<section class="table-card">
+  <h3>Latest anomalies</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Rule</th><th>Severity</th><th>Reason</th></tr></thead>
+    <tbody>
+      {% for a in anomalies %}
+      <tr>
+        <td>{{ a.anomaly_id }}</td>
+        <td>{{ a.rule_name }}</td>
+        <td>{{ a.severity.value }}</td>
+        <td>{{ a.reason }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">No anomalies yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
