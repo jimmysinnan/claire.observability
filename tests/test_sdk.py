@@ -2,13 +2,13 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.sdk.client import MiraClient
+from app.sdk.client import ClaireClient
 from app.sdk.decorators import instrument_prediction
 
 
 @pytest.mark.asyncio
 async def test_instrument_prediction_decorator() -> None:
-    client = MiraClient("http://localhost:8000", "token")
+    client = ClaireClient("http://localhost:8000", "token")
     client.send_event = AsyncMock(return_value={"ok": True})  # type: ignore[method-assign]
 
     @instrument_prediction(client)

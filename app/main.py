@@ -17,7 +17,7 @@ configure_telemetry()
 logger = logging.getLogger(__name__)
 log_store = LogStore()
 
-app = FastAPI(title="Mira AI Observability", version="0.2.0")
+app = FastAPI(title="Claire AI Observability", version="0.2.0")
 app.include_router(router, prefix="/api/v1", tags=["observability"])
 app.include_router(web_router, tags=["web"])
 app.mount("/static", StaticFiles(directory="app/web/static"), name="static")

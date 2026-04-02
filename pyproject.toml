@@ -1,5 +1,5 @@
 [project]
-name = "mira-observability"
+name = "claire-observability"
 version = "0.1.0"
 description = "MVP observability platform for AI e-commerce agents"
 readme = "README.md"

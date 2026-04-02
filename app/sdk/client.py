@@ -3,7 +3,7 @@ from typing import Any
 import httpx
 
 
-class MiraClient:
+class ClaireClient:
     def __init__(self, base_url: str, api_token: str, timeout: float = 5.0) -> None:
         self.base_url = base_url.rstrip("/")
         self.headers = {"X-API-Token": api_token}

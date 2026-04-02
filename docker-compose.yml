@@ -44,7 +44,7 @@ services:
     build: .
     depends_on: [kafka, prometheus, elasticsearch, influxdb]
     environment:
-      MIRA_API_TOKEN: changeme
-      MIRA_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      MIRA_ELASTICSEARCH_URL: http://elasticsearch:9200
+      CLAIRE_API_TOKEN: changeme
+      CLAIRE_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      CLAIRE_ELASTICSEARCH_URL: http://elasticsearch:9200
     ports: ["8000:8000"]

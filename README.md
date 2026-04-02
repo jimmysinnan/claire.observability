@@ -1,6 +1,6 @@
 # Claire
 Observability IA
-# Mira — Outil d'observabilité IA e-commerce (MVP)
+# Claire — Outil d'observabilité IA e-commerce (MVP)
 
 Ce dépôt fournit un MVP modulaire d'observabilité IA e-commerce avec une expérience web orientée conversion inspirée des parcours produits de plateformes data reliability enterprise.
 

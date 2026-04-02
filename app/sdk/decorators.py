@@ -2,10 +2,10 @@ import functools
 from datetime import datetime
 from typing import Any, Awaitable, Callable
 
-from app.sdk.client import MiraClient
+from app.sdk.client import ClaireClient
 
 
-def instrument_prediction(client: MiraClient, *, event_type: str = "prediction") -> Callable:
+def instrument_prediction(client: ClaireClient, *, event_type: str = "prediction") -> Callable:
     def decorator(
         func: Callable[..., Awaitable[dict[str, Any]]],
     ) -> Callable[..., Awaitable[dict[str, Any]]]:

@@ -4,8 +4,8 @@ from prometheus_client import Counter as PromCounter
 
 from app.models.schemas import Anomaly, MetricsSnapshot
 
-EVENT_COUNTER = PromCounter("mira_events_total", "Total ingested AI events")
-ANOMALY_COUNTER = PromCounter("mira_anomalies_total", "Total anomalies", ["rule_name"])
+EVENT_COUNTER = PromCounter("claire_events_total", "Total ingested AI events")
+ANOMALY_COUNTER = PromCounter("claire_anomalies_total", "Total anomalies", ["rule_name"])
 
 
 class MetricsStore:

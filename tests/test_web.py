@@ -14,7 +14,7 @@ def test_landing_page_has_conversion_cta() -> None:
 def test_demo_form_submission() -> None:
     response = client.post(
         "/demo",
-        data={"first_name": "Ada", "work_email": "ada@example.com", "company": "Mira"},
+        data={"first_name": "Ada", "work_email": "ada@example.com", "company": "Claire"},
     )
     assert response.status_code == 200
     assert "Merci Ada" in response.text

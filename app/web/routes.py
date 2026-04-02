@@ -15,7 +15,7 @@ async def landing_page(request: Request) -> HTMLResponse:
         request,
         "landing.html",
         {
-            "product_name": "Mira",
+            "product_name": "Claire",
             "hero_title": "Data & AI Reliability for E-commerce Agents",
             "hero_subtitle": (
                 "Observe prompts, predictions and recommendations with a conversion-first UX "

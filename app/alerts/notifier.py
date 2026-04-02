@@ -24,6 +24,6 @@ class AlertNotifier:
 
     async def _notify_slack(self, anomaly: Anomaly) -> None:
         async with httpx.AsyncClient(timeout=5) as client:
-            payload = {"text": f"[Mira Alert] {anomaly.rule_name}: {anomaly.reason}"}
+            payload = {"text": f"[Claire Alert] {anomaly.rule_name}: {anomaly.reason}"}
             response = await client.post(settings.slack_webhook_url, json=payload)
             response.raise_for_status()
