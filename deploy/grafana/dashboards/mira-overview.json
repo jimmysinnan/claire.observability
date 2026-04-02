@@ -1,0 +1,19 @@
+{
+  "title": "Mira Overview",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Events Total",
+      "targets": [{"expr": "mira_events_total"}],
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Anomalies Total",
+      "targets": [{"expr": "sum(mira_anomalies_total)"}],
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}
+    }
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}
