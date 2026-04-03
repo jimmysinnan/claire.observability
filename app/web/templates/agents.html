@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Claire | Agents Pixel{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <p class="page-eyebrow">Supervision temps réel</p>
+  <h1 class="page-title">Agents Pixel</h1>
+  <p class="page-sub">Suivez, contrôlez et analysez tous vos agents et automatisations en un coup d'œil.</p>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid" id="kpi-bar">
+  <div class="kpi-card" style="--accent: var(--cyan)">
+    <div class="kpi-label">Agents total</div>
+    <div class="kpi-value" id="kpi-total">{{ agents_total }}</div>
+    <div class="kpi-sub">enregistrés</div>
+  </div>
+  <div class="kpi-card" style="--accent: var(--green)">
+    <div class="kpi-label">En cours</div>
+    <div class="kpi-value text-green" id="kpi-running">{{ agents_running }}</div>
+    <div class="kpi-sub">actifs maintenant</div>
+  </div>
+  <div class="kpi-card" style="--accent: var(--red)">
+    <div class="kpi-label">En erreur</div>
+    <div class="kpi-value text-red" id="kpi-error">{{ agents_error }}</div>
+    <div class="kpi-sub">nécessitent attention</div>
+  </div>
+  <div class="kpi-card" style="--accent: var(--purple)">
+    <div class="kpi-label">Taux de succès</div>
+    <div class="kpi-value" id="kpi-sr">—</div>
+    <div class="kpi-sub">global agents</div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="flex items-center gap-3 mb-3">
+  <button class="btn btn-primary" onclick="openAddAgentModal()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Ajouter un agent
+  </button>
+
+  <div class="flex gap-2 ml-auto">
+    <button class="btn btn-ghost btn-sm filter-btn active" data-filter="all">Tous</button>
+    <button class="btn btn-ghost btn-sm filter-btn" data-filter="running">En cours</button>
+    <button class="btn btn-ghost btn-sm filter-btn" data-filter="error">Erreurs</button>
+    <button class="btn btn-ghost btn-sm filter-btn" data-filter="idle">Inactifs</button>
+  </div>
+</div>
+
+<!-- Agents Grid — populated by JS -->
+<div class="agents-grid" id="agents-grid">
+  {% if not agents %}
+  <div class="empty-state" style="grid-column:1/-1">
+    <div class="empty-icon">🤖</div>
+    <div class="empty-title">Aucun agent pour l'instant</div>
+    <div class="empty-sub">Cliquez sur "Ajouter un agent" ou connectez une intégration.</div>
+  </div>
+  {% else %}
+  {% for agent in agents %}
+  <div class="agent-card" data-agent-id="{{ agent.agent_id }}" data-status="{{ agent.status.value }}">
+    <div class="agent-card-top">
+      <div class="pixel-avatar avatar-{{ agent.integration.value }}">
+        {{ agent_avatar(agent.integration.value, agent.agent_id) | safe }}
+        <div class="pixel-status-ring" style="--status-color: var(--{{ agent.status.value }})"></div>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name">{{ agent.name }}</div>
+        <div class="agent-integration">
+          <span class="integration-dot" style="background: {{ integ_color(agent.integration.value) }}"></span>
+          {{ agent.integration.value | upper }}
+        </div>
+      </div>
+      <div class="status-badge status-{{ agent.status.value }}">
+        <span class="led"></span>
+        {{ agent.status.value | upper }}
+      </div>
+    </div>
+
+    <div class="agent-stats">
+      <div class="agent-stat">
+        <div class="stat-val">{{ agent.runs_today }}</div>
+        <div class="stat-lbl">Runs</div>
+      </div>
+      <div class="agent-stat">
+        <div class="stat-val">{{ agent.errors_today }}</div>
+        <div class="stat-lbl">Erreurs</div>
+      </div>
+      <div class="agent-stat">
+        <div class="stat-val">{{ agent.success_rate }}%</div>
+        <div class="stat-lbl">Succès</div>
+      </div>
+    </div>
+
+    <div class="agent-task">
+      {% if agent.current_task %}
+      <span class="task-cursor"></span>
+      <span>{{ agent.current_task }}</span>
+      {% else %}
+      <span style="opacity:.4">— en attente —</span>
+      {% endif %}
+    </div>
+
+    <div class="agent-actions">
+      {% if agent.status.value == 'running' %}
+      <button class="btn-icon" onclick="pauseAgent('{{ agent.agent_id }}')" title="Mettre en pause">
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        Pause
+      </button>
+      {% else %}
+      <button class="btn-icon" onclick="resumeAgent('{{ agent.agent_id }}')" title="Relancer">
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        Run
+      </button>
+      {% endif %}
+      <button class="btn-icon" onclick="showAgentLogs('{{ agent.agent_id }}', '{{ agent.name }}')" title="Voir les logs">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        Logs
+      </button>
+      <button class="btn-icon danger" onclick="deleteAgent('{{ agent.agent_id }}', '{{ agent.name }}')" title="Supprimer">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/></svg>
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+<!-- Live log panel -->
+<div class="panel mb-4">
+  <div class="panel-header">
+    <span class="panel-title">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      Flux live
+    </span>
+    <button class="btn btn-ghost btn-sm" onclick="clearLogs()">Effacer</button>
+  </div>
+  <div class="log-console" style="border:none;border-radius:0 0 var(--radius-lg) var(--radius-lg)">
+    <div class="log-console-body" id="log-body">
+      <div class="log-line">
+        <span class="log-time">—</span>
+        <span class="log-level level-INFO">INFO</span>
+        <span class="log-msg">Connexion WebSocket en cours...</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Inject server-side data for JS hydration
+window.__AGENTS__ = {{ agents_json | safe }};
+</script>
+{% endblock %}

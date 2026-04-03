@@ -1,29 +1,41 @@
 {% extends "base.html" %}
-{% block title %}Claire | Book Demo{% endblock %}
-{% block content %}
-<section class="hero compact">
-  <p class="eyebrow">Conversion</p>
-  <h1>Book your AI reliability demo</h1>
-</section>
+{% block title %}Claire | Demande de démo{% endblock %}
 
-<section class="form-card">
-  {% if submitted %}
-    <h3>Merci {{ first_name }} 👋</h3>
-    <p>Votre demande pour {{ company }} a bien été envoyée. Notre équipe vous contacte rapidement.</p>
-  {% else %}
-  <form method="post" action="/demo" class="demo-form">
-    <label>First name<input type="text" name="first_name" required /></label>
-    <label>Work email<input type="email" name="work_email" required /></label>
-    <label>Company<input type="text" name="company" required /></label>
-    <label>Use case
-      <select name="use_case">
-        <option>Recommendations</option>
-        <option>Pricing assistant</option>
-        <option>Support agent</option>
-      </select>
-    </label>
-    <button class="btn" type="submit">Request demo</button>
-  </form>
-  {% endif %}
-</section>
+{% block content %}
+<div class="page-header">
+  <p class="page-eyebrow">Contact</p>
+  <h1 class="page-title">Réserver une démo</h1>
+  <p class="page-sub">Découvrez Claire en 20 minutes avec un expert — aucune installation requise.</p>
+</div>
+
+<div style="max-width:480px">
+{% if submitted %}
+  <div class="panel" style="padding:2.5rem;text-align:center">
+    <div style="font-size:3rem;margin-bottom:1rem">&#127881;</div>
+    <h2 style="margin-bottom:.5rem">Merci {{ first_name }} !</h2>
+    <p class="text-muted">Nous reviendrons vers vous sous 24h pour organiser votre démo chez <strong>{{ company }}</strong>.</p>
+    <a class="btn btn-primary" href="/dashboard" style="margin-top:1.5rem;display:inline-flex">Voir le dashboard</a>
+  </div>
+{% else %}
+  <div class="panel" style="padding:2rem">
+    <form method="POST" action="/demo" style="display:flex;flex-direction:column;gap:1rem">
+      <div class="form-group">
+        <label class="form-label" for="first_name">Prénom</label>
+        <input class="form-input" id="first_name" name="first_name" type="text" placeholder="Jean" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="company">Entreprise</label>
+        <input class="form-input" id="company" name="company" type="text" placeholder="Acme Corp" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Email professionnel</label>
+        <input class="form-input" id="email" name="email" type="email" placeholder="jean@acme.com" required>
+      </div>
+      <button class="btn btn-primary btn-full" type="submit">
+        Réserver ma démo &#8594;
+      </button>
+    </form>
+  </div>
+{% endif %}
+</div>
 {% endblock %}

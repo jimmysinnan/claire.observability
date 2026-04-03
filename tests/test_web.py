@@ -8,7 +8,7 @@ client = TestClient(app)
 def test_landing_page_has_conversion_cta() -> None:
     response = client.get("/")
     assert response.status_code == 200
-    assert "Book a Demo" in response.text
+    assert "/dashboard" in response.text
 
 
 def test_demo_form_submission() -> None:

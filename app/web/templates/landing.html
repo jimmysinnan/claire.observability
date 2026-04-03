@@ -1,37 +1,79 @@
 {% extends "base.html" %}
-{% block title %}Claire | AI Reliability{% endblock %}
+{% block title %}Claire Observability — Surveillez vos agents IA{% endblock %}
+
 {% block content %}
-<section class="hero">
-  <p class="eyebrow">AI Observability Platform</p>
-  <h1>{{ hero_title }}</h1>
-  <p class="subtitle">{{ hero_subtitle }}</p>
-  <div class="cta-row">
-    <a class="btn" href="/demo">{{ cta_primary }}</a>
-    <a class="btn btn-ghost" href="/tour">{{ cta_secondary }}</a>
+<div class="landing-hero">
+  <p class="hero-eyebrow">Plateforme d'observabilité IA</p>
+
+  <h1 class="hero-title">
+    Contrôlez tous vos<br>
+    <span class="hl">agents et automatisations</span><br>
+    en temps réel.
+  </h1>
+
+  <p class="hero-sub">
+    Connectez n8n, Make, Claude, ChatGPT, Gemini et plus encore.
+    Observez chaque run, détectez les anomalies, agissez en 1 clic.
+    Même les débutants comprennent tout au premier coup d'œil.
+  </p>
+
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="/dashboard">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Ouvrir le Dashboard
+    </a>
+    <a class="btn btn-secondary" href="/agents">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/>
+      </svg>
+      Agents Pixel
+    </a>
+    <a class="btn btn-ghost" href="/integrations">Connecter un outil →</a>
   </div>
-</section>
 
-<section class="metrics-grid">
-  <article class="card">
-    <h3>Total events</h3>
-    <p>{{ metrics.total_events }}</p>
-  </article>
-  <article class="card">
-    <h3>Anomalies detected</h3>
-    <p>{{ metrics.anomalies_detected }}</p>
-  </article>
-  <article class="card">
-    <h3>Rules monitored</h3>
-    <p>{{ metrics.anomalies_by_rule | length }}</p>
-  </article>
-</section>
+  <!-- Stats -->
+  <div class="hero-stats">
+    <div>
+      <div class="hero-stat-val text-cyan" id="stat-events">{{ snapshot.total_events }}</div>
+      <div class="hero-stat-lbl">Événements analysés</div>
+    </div>
+    <div>
+      <div class="hero-stat-val">{{ agents_total }}</div>
+      <div class="hero-stat-lbl">Agents connectés</div>
+    </div>
+    <div>
+      <div class="hero-stat-val text-green">{{ agents_running }}</div>
+      <div class="hero-stat-lbl">En cours maintenant</div>
+    </div>
+    <div>
+      <div class="hero-stat-val">6</div>
+      <div class="hero-stat-lbl">Intégrations disponibles</div>
+    </div>
+  </div>
+</div>
 
-<section class="proof">
-  <h2>Purpose-built for e-commerce AI teams</h2>
-  <ul>
-    <li>Trace prompts and recommendations end-to-end.</li>
-    <li>Prevent revenue leakage with anomaly rules.</li>
-    <li>Convert alerts to decisions faster with guided triage UX.</li>
-  </ul>
+<!-- Features section -->
+<section style="padding:3rem 3rem 5rem;border-top:1px solid var(--border)">
+  <p class="page-eyebrow" style="margin-bottom:1rem">Fonctionnalités</p>
+  <div class="three-col">
+    <div class="panel" style="padding:1.5rem">
+      <div style="font-size:1.8rem;margin-bottom:1rem">🤖</div>
+      <div class="font-bold" style="margin-bottom:.5rem">Agents Pixel</div>
+      <div class="text-muted text-sm">Visualisation pixel-art en temps réel de tous vos agents. Statut, métriques, logs — tout en un coup d'œil.</div>
+    </div>
+    <div class="panel" style="padding:1.5rem">
+      <div style="font-size:1.8rem;margin-bottom:1rem">⚡</div>
+      <div class="font-bold" style="margin-bottom:.5rem">Intégrations faciles</div>
+      <div class="text-muted text-sm">n8n, Make, Claude, ChatGPT, Gemini. Connectez en 2 clics via webhook ou clé API. Sans code.</div>
+    </div>
+    <div class="panel" style="padding:1.5rem">
+      <div style="font-size:1.8rem;margin-bottom:1rem">🔍</div>
+      <div class="font-bold" style="margin-bottom:.5rem">Anomalies automatiques</div>
+      <div class="text-muted text-sm">Détection intelligente d'anomalies — prix négatifs, ruptures de stock, hallucinations IA. Alertes Slack incluses.</div>
+    </div>
+  </div>
 </section>
 {% endblock %}

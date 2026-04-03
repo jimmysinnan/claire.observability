@@ -1,33 +1,147 @@
 {% extends "base.html" %}
-{% block title %}Claire | Reliability Dashboard{% endblock %}
+{% block title %}Claire | Dashboard{% endblock %}
+
 {% block content %}
-<section class="hero compact">
-  <p class="eyebrow">Operational cockpit</p>
-  <h1>Reliability Dashboard</h1>
-</section>
+<div class="page-header">
+  <p class="page-eyebrow">Vue d'ensemble</p>
+  <h1 class="page-title">Dashboard Fiabilité</h1>
+  <p class="page-sub">Métriques temps réel — événements, anomalies, agents actifs.</p>
+</div>
 
-<section class="metrics-grid">
-  <article class="card"><h3>Events</h3><p>{{ snapshot.total_events }}</p></article>
-  <article class="card"><h3>Anomalies</h3><p>{{ snapshot.anomalies_detected }}</p></article>
-  <article class="card"><h3>Anomaly rate</h3><p>{{ anomaly_rate }}%</p></article>
-</section>
+<!-- KPIs -->
+<div class="kpi-grid mb-4">
+  <div class="kpi-card" style="--accent:var(--cyan)">
+    <div class="kpi-label">Événements</div>
+    <div class="kpi-value" id="kpi-events">{{ snapshot.total_events }}</div>
+    <div class="kpi-sub">ingérés</div>
+  </div>
+  <div class="kpi-card" style="--accent:var(--red)">
+    <div class="kpi-label">Anomalies</div>
+    <div class="kpi-value text-red" id="kpi-anomalies">{{ snapshot.anomalies_detected }}</div>
+    <div class="kpi-sub">{{ anomaly_rate }}% du trafic</div>
+  </div>
+  <div class="kpi-card" style="--accent:var(--green)">
+    <div class="kpi-label">Agents actifs</div>
+    <div class="kpi-value text-green" id="kpi-agents">{{ agents_running }}</div>
+    <div class="kpi-sub">sur {{ agents_total }} agents</div>
+  </div>
+  <div class="kpi-card" style="--accent:var(--purple)">
+    <div class="kpi-label">Règles surveillées</div>
+    <div class="kpi-value">{{ snapshot.anomalies_by_rule | length }}</div>
+    <div class="kpi-sub">détection active</div>
+  </div>
+</div>
 
-<section class="table-card">
-  <h3>Latest anomalies</h3>
-  <table>
-    <thead><tr><th>ID</th><th>Rule</th><th>Severity</th><th>Reason</th></tr></thead>
-    <tbody>
-      {% for a in anomalies %}
-      <tr>
-        <td>{{ a.anomaly_id }}</td>
-        <td>{{ a.rule_name }}</td>
-        <td>{{ a.severity.value }}</td>
-        <td>{{ a.reason }}</td>
-      </tr>
+<div class="two-col mb-4">
+  <!-- Anomalies table -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        Anomalies récentes
+      </span>
+      <a class="btn btn-ghost btn-sm" href="/docs#/api/list_anomalies_api_v1_anomalies_get">API</a>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Règle</th>
+            <th>Sévérité</th>
+            <th>Raison</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in anomalies %}
+          <tr>
+            <td class="text-mono text-sm">{{ a.rule_name }}</td>
+            <td><span class="sev-{{ a.severity.value }}">{{ a.severity.value }}</span></td>
+            <td class="text-muted text-sm">{{ a.reason }}</td>
+            <td class="text-muted text-xs">{{ format_dt(a.created_at) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">
+            <div class="empty-state" style="padding:2rem">
+              <div class="empty-icon">✅</div>
+              <div class="empty-title">Aucune anomalie</div>
+              <div class="empty-sub">Tout fonctionne correctement.</div>
+            </div>
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Anomalies par règle -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="18" y="3" width="4" height="18"/><rect x="10" y="8" width="4" height="13"/>
+          <rect x="2" y="13" width="4" height="8"/>
+        </svg>
+        Répartition par règle
+      </span>
+    </div>
+    <div class="panel-body">
+      {% if snapshot.anomalies_by_rule %}
+        {% for rule, count in snapshot.anomalies_by_rule.items() %}
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+          <div class="text-mono text-xs text-muted" style="min-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ rule }}</div>
+          <div style="flex:1;height:8px;background:rgba(34,211,238,0.1);border-radius:4px;overflow:hidden">
+            <div style="height:100%;background:linear-gradient(90deg,var(--cyan),var(--teal));width:{{ [count * 10, 100] | min }}%;border-radius:4px;transition:width .5s"></div>
+          </div>
+          <div class="text-cyan font-bold text-sm" style="min-width:28px;text-align:right">{{ count }}</div>
+        </div>
+        {% endfor %}
       {% else %}
-      <tr><td colspan="4">No anomalies yet.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
+        <div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Aucune donnée</div></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Live console -->
+<div class="log-console mb-4">
+  <div class="log-console-header">
+    <div class="console-dots">
+      <div class="console-dot dot-red"></div>
+      <div class="console-dot dot-yellow"></div>
+      <div class="console-dot dot-green"></div>
+    </div>
+    <div class="log-console-title">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+      </svg>
+      claire.observability — live feed
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="clearLogs()">Effacer</button>
+  </div>
+  <div class="log-console-body" id="log-body">
+    {% for log in logs %}
+    <div class="log-line">
+      <span class="log-time">{{ log.timestamp.strftime('%H:%M:%S') }}</span>
+      <span class="log-level level-{{ log.level.value }}">{{ log.level.value }}</span>
+      <span class="log-msg"><span class="log-source">{{ log.source }}</span> · {{ log.message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Quick access -->
+<div class="flex gap-3">
+  <a class="btn btn-secondary" href="/agents">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/>
+    </svg>
+    Voir les agents
+  </a>
+  <a class="btn btn-ghost" href="/integrations">Gérer les intégrations</a>
+  <a class="btn btn-ghost" href="/docs" target="_blank">Docs API</a>
+</div>
 {% endblock %}

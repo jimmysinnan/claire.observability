@@ -1,5 +1,5 @@
 from app.alerts.notifier import AlertNotifier
-from app.anomalies.engine import AnomalyEngine
+from app.anomalies.engine import AnomalyEngine  # noqa: F401 — canonical import path
 from app.ingestion.normalizer import normalize_event
 from app.models.schemas import AIEvent, Anomaly
 from app.storage.metrics import MetricsStore
