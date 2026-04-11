@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claire — Kit de prise en main</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg:      #0f1117;
+      --bg2:     #161b27;
+      --bg3:     #1c2433;
+      --border:  rgba(255,255,255,0.08);
+      --primary: #e05d38;
+      --blue:    #86a7c8;
+      --text:    #e8ebed;
+      --muted:   #6b7280;
+      --success: #22c55e;
+      --error:   #ef4444;
+      --warning: #f59e0b;
+      --r:       12px;
+      --r-sm:    8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ul { list-style: none; }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 8px;
+      color: #a5f3fc;
+    }
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 20px;
+      overflow-x: auto;
+      color: #e8ebed;
+      line-height: 1.7;
+      margin: 16px 0;
+    }
+    pre .key   { color: #86a7c8; }
+    pre .val   { color: #a5f3fc; }
+    pre .str   { color: #86efac; }
+    pre .cmt   { color: #6b7280; font-style: italic; }
+    pre .url   { color: #fbbf24; }
+
+    /* Layout */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 28px; }
+    section { padding: 64px 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    /* Serif headings */
+    h1, h2, h3 {
+      font-family: 'Source Serif 4', serif;
+      font-weight: 700;
+    }
+
+    /* Print */
+    @media print {
+      nav, .print-hide { display: none !important; }
+      body { background: #fff; color: #111; }
+      pre, code { background: #f3f4f6; color: #1f2937; }
+      .module-card { break-inside: avoid; }
+      :root { --bg2: #f9fafb; --bg3: #f3f4f6; --border: #e5e7eb; --text: #111; --muted: #6b7280; }
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: rgba(15,17,23,0.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .topbar-logo {
+      font-family: 'Source Serif 4', serif;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .topbar-logo span { color: var(--primary); }
+    .topbar-tag {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(134,167,200,0.12);
+      border: 1px solid rgba(134,167,200,0.25);
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .btn-print {
+      padding: 7px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-print:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+    /* ── HERO KIT ── */
+    .kit-hero {
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--border);
+      background: radial-gradient(ellipse 700px 400px at 60% 0%, rgba(224,93,56,0.07), transparent);
+    }
+    .kit-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    .kit-hero h1 {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.12;
+      letter-spacing: -0.015em;
+      margin-bottom: 16px;
+    }
+    .kit-hero p {
+      font-size: 16px;
+      color: #9ca3af;
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .client-name-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      max-width: 380px;
+    }
+    .client-name-input label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .client-name-input input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      flex: 1;
+    }
+    .client-name-input input::placeholder { color: var(--muted); font-weight: 400; }
+
+    /* ── TIMELINE DÉMARRAGE ── */
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0;
+      margin-top: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .timeline-step {
+      padding: 24px 20px;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+    .timeline-step:last-child { border-right: none; }
+    .step-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+    .step-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .step-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .step-duration {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--blue);
+      font-weight: 500;
+    }
+
+    /* ── MODULES ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(22px, 3vw, 32px);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+    }
+    .section-sub { font-size: 15px; color: #9ca3af; line-height: 1.7; margin-bottom: 36px; }
+
+    .module-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+    .module-card:hover { border-color: rgba(224,93,56,0.25); }
+    .module-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .module-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .module-title { font-family: 'Source Serif 4', serif; font-size: 18px; font-weight: 600; }
+    .module-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .module-body { font-size: 14px; color: #9ca3af; line-height: 1.7; }
+    .module-body p { margin-bottom: 14px; }
+    .module-body p:last-child { margin-bottom: 0; }
+
+    /* Steps numérotés */
+    .steps { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+    .step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .step-circle {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(224,93,56,0.15);
+      border: 1px solid rgba(224,93,56,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-text { font-size: 14px; color: #9ca3af; line-height: 1.6; }
+    .step-text strong { color: var(--text); font-weight: 600; }
+
+    /* Intégrations */
+    .integ-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .integ-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 20px;
+    }
+    .integ-name { font-size: 15px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .integ-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+    .integ-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .tag-green { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
+    .tag-blue  { background: rgba(134,167,200,0.12); color: var(--blue);   border: 1px solid rgba(134,167,200,0.25); }
+    .tag-orange{ background: rgba(224,93,56,0.12);  color: var(--primary); border: 1px solid rgba(224,93,56,0.25); }
+
+    /* KPIs expliqués */
+    .kpi-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .kpi-table th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .kpi-table td {
+      padding: 12px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+    }
+    .kpi-table td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+    .kpi-table td:nth-child(2) { color: #9ca3af; }
+    .kpi-table td:nth-child(3) { color: var(--blue); font-size: 12px; }
+
+    /* Guardrails */
+    .guard-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      border-radius: var(--r-sm);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .guard-toggle {
+      width: 36px; height: 20px;
+      border-radius: 10px;
+      background: var(--success);
+      flex-shrink: 0;
+      margin-top: 2px;
+      position: relative;
+    }
+    .guard-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 18px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+    }
+    .guard-toggle.off { background: #4b5563; }
+    .guard-toggle.off::after { left: 2px; }
+    .guard-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .guard-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* FAQ */
+    .faq-item {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .faq-a { font-size: 14px; color: #9ca3af; line-height: 1.65; }
+
+    /* Contact */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .contact-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 24px;
+    }
+    .contact-type { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .contact-val { font-size: 15px; font-weight: 600; color: var(--primary); }
+    .contact-note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    /* Footer */
+    .kit-footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .kit-footer-logo { font-family: 'Source Serif 4', serif; font-size: 15px; font-weight: 700; }
+    .kit-footer-logo span { color: var(--primary); }
+    .kit-footer-copy { font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <nav class="topbar">
+    <div class="container">
+      <div class="topbar-inner">
+        <div class="topbar-logo">Claire<span> · </span>Observability</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="topbar-tag">Kit de prise en main</span>
+          <button class="btn-print print-hide" onclick="window.print()">Imprimer / PDF</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="kit-hero">
+    <div class="container">
+      <p class="kit-label">Documentation client</p>
+      <h1>Kit de prise en main<br><span style="color:var(--primary);">Claire Observability</span></h1>
+      <p>Ce guide vous accompagne de la connexion de vos premiers agents jusqu'à la maîtrise complète de la plateforme. Chaque module est indépendant et réalisable à votre rythme.</p>
+      <div class="client-name-input">
+        <label>Préparé pour :</label>
+        <input type="text" id="clientName" placeholder="Votre entreprise" oninput="updateClientName(this.value)">
+      </div>
+
+      <!-- Timeline démarrage -->
+      <div class="timeline" style="margin-top:40px;">
+        <div class="timeline-step" style="background:rgba(224,93,56,0.05);">
+          <div class="step-num">Étape 1</div>
+          <div class="step-title">Connexion des agents</div>
+          <div class="step-desc">Branchez Make, n8n ou vos LLMs à Claire via webhook ou API.</div>
+          <div class="step-duration">⏱ 30 min</div>
+        </div>
+        <div class="timeline-step">
+          <div class="step-num">Étape 2</div>
+          <div class="step-title">Configuration du dashboard</div>
+          <div class="step-desc">Personnalisez les alertes, seuils et notifications de votre équipe.</div>
+          <div class="step-duration">⏱ 45 min</div>
+        </div>
+        <div class="timeline-step">
+          <div class="step-num">Étape 3</div>
+          <div class="step-title">Premier test de contrôle</div>
+          <div class="step-desc">Pausez un agent, lancez une RCA et appliquez un playbook.</div>
+          <div class="step-duration">⏱ 20 min</div>
+        </div>
+        <div class="timeline-step" style="border-right:none;">
+          <div class="step-num">Étape 4</div>
+          <div class="step-title">Activation gouvernance</div>
+          <div class="step-desc">Activez les guardrails IA et consultez le score AgentOps.</div>
+          <div class="step-duration">⏱ 15 min</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 1 : CONNEXION -->
+  <section id="module-1">
+    <div class="container">
+      <p class="section-label">Module 1</p>
+      <h2 class="section-title">Connecter vos agents à Claire</h2>
+      <p class="section-sub">Claire reçoit les événements de vos automatisations via un webhook HTTPS simple. Aucun SDK à installer, aucune modification de code existant.</p>
+
+      <div class="integ-grid">
+        <div class="integ-card">
+          <div class="integ-name">🔮 Make (Integromat)</div>
+          <div class="integ-desc">Ajoutez un module HTTP dans votre scénario pour envoyer les événements à Claire.</div>
+          <span class="integ-tag tag-green">Webhook</span>
+        </div>
+        <div class="integ-card">
+          <div class="integ-name">⚡ n8n</div>
+          <div class="integ-desc">Utilisez le nœud HTTP Request pour envoyer les logs à l'endpoint Claire.</div>
+          <span class="integ-tag tag-green">Webhook</span>
+        </div>
+        <div class="integ-card">
+          <div class="integ-name">🧠 Claude (Anthropic)</div>
+          <div class="integ-desc">Interceptez les réponses de l'API Claude et retransmettez-les à Claire.</div>
+          <span class="integ-tag tag-blue">API hook</span>
+        </div>
+        <div class="integ-card">
+          <div class="integ-name">🤖 OpenAI</div>
+          <div class="integ-desc">Middleware compatible GPT-3.5/4/o. Logging transparent sans latence ajoutée.</div>
+          <span class="integ-tag tag-blue">Middleware</span>
+        </div>
+      </div>
+
+      <!-- Make step-by-step -->
+      <div class="module-card" style="margin-top:28px;">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(124,58,237,0.1); border:1px solid rgba(124,58,237,0.2);">🔮</div>
+          <div>
+            <div class="module-title">Connexion Make — pas à pas</div>
+            <div class="module-sub">5 étapes · ~15 minutes</div>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-circle">1</div>
+            <div class="step-text">Dans votre scénario Make, ajoutez un module <strong>HTTP → Make a request</strong> à la fin de votre workflow.</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">2</div>
+            <div class="step-text">Configurez l'URL : <code>https://votre-instance-claire.io/api/events</code> — méthode : <strong>POST</strong></div>
+          </div>
+          <div class="step">
+            <div class="step-circle">3</div>
+            <div class="step-text">Dans le body JSON, mappez les champs de votre scénario :</div>
+          </div>
+        </div>
+        <pre><span class="cmt">// Body JSON à envoyer depuis Make</span>
+{
+  <span class="key">"agent_id"</span>:   <span class="str">"{{votre_scenario_id}}"</span>,
+  <span class="key">"agent_name"</span>: <span class="str">"{{nom_du_scénario}}"</span>,
+  <span class="key">"status"</span>:     <span class="str">"{{1.status}}"</span>,          <span class="cmt">// running | error | success</span>
+  <span class="key">"message"</span>:    <span class="str">"{{1.result}}"</span>,          <span class="cmt">// résultat ou message d'erreur</span>
+  <span class="key">"timestamp"</span>:  <span class="str">"{{formatDate(now; iso8601)}}"</span>,
+  <span class="key">"integration"</span>:<span class="str">"make"</span>
+}</pre>
+        <div class="steps">
+          <div class="step">
+            <div class="step-circle">4</div>
+            <div class="step-text">Ajoutez le header d'authentification : <code>Authorization: Bearer VOTRE_CLE_API_CLAIRE</code></div>
+          </div>
+          <div class="step">
+            <div class="step-circle">5</div>
+            <div class="step-text">Lancez un test de votre scénario. L'agent doit apparaître dans votre <strong>tableau de bord Claire</strong> sous 60 secondes.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- n8n step-by-step -->
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(224,93,56,0.1); border:1px solid rgba(224,93,56,0.2);">⚡</div>
+          <div>
+            <div class="module-title">Connexion n8n — pas à pas</div>
+            <div class="module-sub">4 étapes · ~10 minutes</div>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-circle">1</div>
+            <div class="step-text">Dans votre workflow n8n, ajoutez un nœud <strong>HTTP Request</strong> à la fin de votre chaîne.</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">2</div>
+            <div class="step-text">Méthode : <code>POST</code> · URL : <code>https://votre-instance-claire.io/api/events</code></div>
+          </div>
+          <div class="step">
+            <div class="step-circle">3</div>
+            <div class="step-text">Authentication : Header Auth · Name : <code>Authorization</code> · Value : <code>Bearer VOTRE_CLE</code></div>
+          </div>
+        </div>
+        <pre><span class="cmt">// Body JSON (JSON/RAW dans n8n)</span>
+{
+  <span class="key">"agent_id"</span>:    <span class="str">"{{ $workflow.id }}"</span>,
+  <span class="key">"agent_name"</span>:  <span class="str">"{{ $workflow.name }}"</span>,
+  <span class="key">"status"</span>:      <span class="str">"{{ $runIndex > 0 ? 'success' : 'running' }}"</span>,
+  <span class="key">"message"</span>:     <span class="str">"{{ JSON.stringify($json) }}"</span>,
+  <span class="key">"timestamp"</span>:   <span class="str">"{{ new Date().toISOString() }}"</span>,
+  <span class="key">"integration"</span>: <span class="str">"n8n"</span>
+}</pre>
+        <div class="step" style="margin-top:14px;">
+          <div class="step-circle">4</div>
+          <div class="step-text">Activez et exécutez votre workflow. Vérifiez l'apparition de l'agent dans Claire.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODULE 2 : DASHBOARD -->
+  <section id="module-2">
+    <div class="container">
+      <p class="section-label">Module 2</p>
+      <h2 class="section-title">Comprendre le tableau de bord</h2>
+      <p class="section-sub">Le dashboard centralise l'état de tous vos agents. Voici comment lire chaque indicateur et configurer les alertes adaptées à votre activité.</p>
+
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(134,167,200,0.1); border:1px solid rgba(134,167,200,0.2);">📊</div>
+          <div>
+            <div class="module-title">Lecture des KPIs</div>
+            <div class="module-sub">Ce que chaque chiffre signifie pour votre activité</div>
+          </div>
+        </div>
+        <table class="kpi-table">
+          <thead>
+            <tr>
+              <th>Indicateur</th>
+              <th>Signification</th>
+              <th>Seuil d'alerte recommandé</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Score de santé</td>
+              <td>Synthèse pondérée : taux d'erreur, latence, anomalies détectées. 100 = parfait.</td>
+              <td>Alerte si &lt; 70</td>
+            </tr>
+            <tr>
+              <td>Latence (ms)</td>
+              <td>Temps moyen de réponse de l'agent sur les 15 dernières minutes.</td>
+              <td>Alerte si &gt; 2 000 ms</td>
+            </tr>
+            <tr>
+              <td>Événements / h</td>
+              <td>Nombre d'exécutions de l'agent sur la dernière heure.</td>
+              <td>Alerte si chute &gt; 50%</td>
+            </tr>
+            <tr>
+              <td>Anomalies</td>
+              <td>Comportements hors-norme détectés (timeout, erreur répétée, déviation de prompt).</td>
+              <td>Alerte si &gt; 3 en 1h</td>
+            </tr>
+            <tr>
+              <td>Statut</td>
+              <td><span style="color:var(--success)">Running</span> · <span style="color:var(--error)">Error</span> · <span style="color:var(--warning)">Paused</span> · <span style="color:var(--muted)">Idle</span></td>
+              <td>Alerte immédiate si Error</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.2);">🔔</div>
+          <div>
+            <div class="module-title">Configurer les alertes</div>
+            <div class="module-sub">Notifications email et Slack</div>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-circle">1</div>
+            <div class="step-text">Dans Claire → <strong>Paramètres → Alertes</strong>, cliquez sur "Nouvelle alerte".</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">2</div>
+            <div class="step-text">Sélectionnez le trigger : <strong>Score de santé &lt; seuil</strong> · <strong>Statut = Error</strong> · <strong>Anomalies &gt; N en X min</strong></div>
+          </div>
+          <div class="step">
+            <div class="step-circle">3</div>
+            <div class="step-text">Configurez le canal : <strong>email</strong> (multi-destinataire) ou <strong>Slack webhook</strong>. Testez avant de sauvegarder.</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">4</div>
+            <div class="step-text">Recommandation : créez au moins 2 alertes — une critique (Error) et une préventive (Score &lt; 70).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODULE 3 : AGIR -->
+  <section id="module-3">
+    <div class="container">
+      <p class="section-label">Module 3</p>
+      <h2 class="section-title">Agir sur un agent — sans code</h2>
+      <p class="section-sub">L'onglet Contrôle vous donne les commandes directes sur chaque agent. L'onglet Diagnostic vous aide à comprendre et résoudre les incidents.</p>
+
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(224,93,56,0.1); border:1px solid rgba(224,93,56,0.2);">⚡</div>
+          <div>
+            <div class="module-title">Onglet Contrôle — actions directes</div>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-circle">▶</div>
+            <div class="step-text"><strong>Pause / Reprendre</strong> — Stoppe l'exécution de l'agent. Les événements en file d'attente sont conservés et relancés automatiquement à la reprise.</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">⧖</div>
+            <div class="step-text"><strong>Throttle</strong> — Réduit le débit de l'agent (% d'appels autorisés/min). Utile lors de pics de charge ou de quotas API approchants.</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">↩</div>
+            <div class="step-text"><strong>Rollback</strong> — Revient à la configuration précédente de l'agent (prompt, paramètres). Utilisez si un changement récent a dégradé les performances.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(134,167,200,0.1); border:1px solid rgba(134,167,200,0.2);">🔍</div>
+          <div>
+            <div class="module-title">Onglet Diagnostic — Root Cause Analysis</div>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-circle">1</div>
+            <div class="step-text">Sélectionnez l'agent en anomalie dans la liste. Son statut sera <span style="color:var(--error)">Error</span> ou son score de santé bas.</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">2</div>
+            <div class="step-text">Cliquez sur <strong>"Lancer l'analyse RCA"</strong>. Claire analyse les derniers logs, patterns et corrélations temporelles (3–5 secondes).</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">3</div>
+            <div class="step-text">Le résultat affiche : <strong>cause racine identifiée</strong> · impact estimé · timeline de l'incident.</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">4</div>
+            <div class="step-text">Les <strong>Playbooks de remédiation</strong> apparaissent automatiquement sous la RCA. Cliquez sur "Appliquer" pour chaque étape validée.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODULE 4 : GOUVERNANCE -->
+  <section id="module-4">
+    <div class="container">
+      <p class="section-label">Module 4</p>
+      <h2 class="section-title">Gouvernance & Sécurité IA</h2>
+      <p class="section-sub">Claire vous permet de surveiller la fiabilité comportementale de vos agents — pas seulement leur disponibilité — et de sécuriser vos données en transit.</p>
+
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2);">🛡</div>
+          <div>
+            <div class="module-title">Guardrails IA — onglet Contrôle</div>
+            <div class="module-sub">Protections actives configurables sans code</div>
+          </div>
+        </div>
+
+        <div class="guard-row">
+          <div class="guard-toggle"></div>
+          <div>
+            <div class="guard-name">Détection PII (données personnelles)</div>
+            <div class="guard-desc">Bloque automatiquement toute donnée personnelle (nom, email, IBAN, numéro de téléphone) avant qu'elle ne soit transmise au LLM. Essentiel pour la conformité RGPD.</div>
+          </div>
+        </div>
+        <div class="guard-row">
+          <div class="guard-toggle"></div>
+          <div>
+            <div class="guard-name">Prévention Prompt Injection</div>
+            <div class="guard-desc">Détecte les tentatives d'injection dans les inputs utilisateurs (ex : "Ignore les instructions précédentes et…"). Protège l'intégrité de vos automatisations.</div>
+          </div>
+        </div>
+        <div class="guard-row">
+          <div class="guard-toggle off"></div>
+          <div>
+            <div class="guard-name">Faithfulness (cohérence des réponses)</div>
+            <div class="guard-desc">Compare les réponses de l'agent avec les sources de référence. Signale les hallucinations ou réponses non fondées. Recommandé pour les agents de conseil ou SAV.</div>
+          </div>
+        </div>
+        <div class="guard-row">
+          <div class="guard-toggle"></div>
+          <div>
+            <div class="guard-name">Filtre contenu non-conforme</div>
+            <div class="guard-desc">Bloque les réponses contenant du contenu inapproprié, hors politique d'usage, ou contraire à la charte de votre entreprise.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(134,167,200,0.1); border:1px solid rgba(134,167,200,0.2);">📈</div>
+          <div>
+            <div class="module-title">Score AgentOps — onglet Gouvernance</div>
+            <div class="module-sub">4 métriques de fiabilité comportementale</div>
+          </div>
+        </div>
+        <table class="kpi-table">
+          <thead><tr><th>Métrique</th><th>Ce qu'elle mesure</th><th>Seuil de vigilance</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Instruction Adherence</td>
+              <td>L'agent suit-il les instructions que vous lui avez données ? Score 0–100.</td>
+              <td>Alerte si &lt; 75</td>
+            </tr>
+            <tr>
+              <td>Tool Accuracy</td>
+              <td>L'agent utilise-t-il les bons outils (APIs, fonctions) dans le bon ordre ?</td>
+              <td>Alerte si &lt; 70</td>
+            </tr>
+            <tr>
+              <td>Context Relevance</td>
+              <td>Les réponses sont-elles pertinentes par rapport au contexte fourni ?</td>
+              <td>Alerte si &lt; 70</td>
+            </tr>
+            <tr>
+              <td>Answer Correctness</td>
+              <td>Les réponses sont-elles factuellement correctes par rapport aux sources ?</td>
+              <td>Alerte si &lt; 70</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="container">
+      <p class="section-label">Support</p>
+      <h2 class="section-title">Questions fréquentes</h2>
+
+      <div class="faq-item">
+        <div class="faq-q">Mon agent n'apparaît pas dans le dashboard après connexion. Que faire ?</div>
+        <div class="faq-a">Vérifiez d'abord que votre webhook envoie bien un code HTTP 200 depuis Make/n8n (l'historique d'exécution le montre). Ensuite, vérifiez que le champ <code>agent_id</code> est unique et non-vide. Si le problème persiste après 2 min, contactez le support avec le contenu exact du body envoyé.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Comment modifier les seuils d'alerte après la configuration initiale ?</div>
+        <div class="faq-a">Dans Claire → <strong>Paramètres → Alertes</strong>, cliquez sur l'alerte existante et modifiez le seuil. Les changements sont appliqués en temps réel, sans redémarrage.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Les guardrails impactent-ils la latence de mes agents ?</div>
+        <div class="faq-a">La détection PII et l'injection ajoutent environ 8–15ms de latence (traitement côté Claire, pas côté LLM). La vérification Faithfulness est asynchrone et n'impacte pas le temps de réponse de votre agent.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Puis-je connecter plusieurs scénarios Make au même agent dans Claire ?</div>
+        <div class="faq-a">Oui. Utilisez le même <code>agent_id</code> dans tous vos scénarios. Claire agrège automatiquement les événements par agent. Chaque scénario peut être identifié via le champ <code>source</code> optionnel dans le body.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Mes données sont-elles stockées par Claire ?</div>
+        <div class="faq-a">Les payloads de logs sont chiffrés au repos (AES-256) et en transit (TLS 1.3). Les données sont stockées dans votre instance dédiée. Aucun partage tiers. Conformité RGPD assurée. Sur demande : DPA disponible.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="container">
+      <p class="section-label">Assistance</p>
+      <h2 class="section-title">Besoin d'aide ? Nous sommes là.</h2>
+      <p class="section-sub">Votre équipe de support Claire est disponible pour vous accompagner à chaque étape de votre démarrage.</p>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-type">Support technique</div>
+          <div class="contact-val">support@claire-observability.io</div>
+          <div class="contact-note">Réponse sous 4h en jours ouvrés · 24h le week-end</div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-type">Onboarding & formation</div>
+          <div class="contact-val">onboarding@claire-observability.io</div>
+          <div class="contact-note">Planifier une session de formation complémentaire</div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-type">Votre référent Claire</div>
+          <div class="contact-val" id="referent-val">Jimmy Sinnan</div>
+          <div class="contact-note">contact@claire-observability.io</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="kit-footer">
+        <div>
+          <div class="kit-footer-logo">Claire<span> · </span>Observability</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:4px;">L'observabilité IA pour les équipes qui agissent.</div>
+        </div>
+        <div style="font-size:12px; color:var(--muted); text-align:right;">
+          <div>Kit de prise en main v1.0 — 2026</div>
+          <div id="footer-client" style="margin-top:4px;"></div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Personalisation client en temps réel
+    function updateClientName(val) {
+      const els = document.querySelectorAll('.client-display')
+      els.forEach(el => { el.textContent = val || 'Votre entreprise' })
+      const footer = document.getElementById('footer-client')
+      if (footer) footer.textContent = val ? `Préparé pour : ${val}` : ''
+    }
+    // Smooth scroll nav
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault()
+        const t = document.querySelector(a.getAttribute('href'))
+        if (t) t.scrollIntoView({ behavior: 'smooth' })
+      })
+    })
+  </script>
+
+</body>
+</html>

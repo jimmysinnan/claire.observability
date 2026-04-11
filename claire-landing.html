@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claire — Vos agents IA font des erreurs. Vous devriez le savoir.</title>
+  <meta name="description" content="Claire est la première plateforme d'observabilité IA pensée pour les équipes ops — pas pour les développeurs. Voyez, comprenez et agissez sur chaque agent en temps réel.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap');
+
+    /* ── TOKENS ─────────────────────────────────────────────────── */
+    :root {
+      --bg:        #0f1117;
+      --bg2:       #161b27;
+      --bg3:       #1c2433;
+      --border:    rgba(255,255,255,0.08);
+      --primary:   #e05d38;
+      --primary-h: #c94d2a;
+      --blue:      #86a7c8;
+      --text:      #e8ebed;
+      --muted:     #6b7280;
+      --success:   #22c55e;
+      --error:     #ef4444;
+      --warning:   #f59e0b;
+      --radius:    12px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    ul { list-style: none; }
+
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+    /* Fade-in on scroll */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: none; }
+
+    /* ── NAV ─────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 17, 23, 0.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      gap: 32px;
+    }
+    .nav-logo {
+      font-family: 'Source Serif 4', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .nav-logo span { color: var(--primary); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .nav-links a {
+      font-size: 14px;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .btn-nav {
+      padding: 9px 20px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .btn-nav:hover { background: var(--primary-h); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(224,93,56,0.35); }
+
+    /* ── HERO ────────────────────────────────────────────────────── */
+    .hero {
+      padding: 100px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 900px 600px at 60% 0%, rgba(224,93,56,0.09) 0%, transparent 70%),
+        radial-gradient(ellipse 600px 400px at 10% 80%, rgba(134,167,200,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; max-width: 740px; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: 99px;
+      border: 1px solid rgba(224,93,56,0.35);
+      background: rgba(224,93,56,0.08);
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 28px;
+      letter-spacing: 0.02em;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.65); }
+    }
+    .hero h1 {
+      font-family: 'Source Serif 4', serif;
+      font-size: clamp(36px, 5vw, 62px);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.025em;
+      margin-bottom: 22px;
+    }
+    .hero h1 em { font-style: italic; color: var(--primary); }
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 19px);
+      color: #9ca3af;
+      max-width: 600px;
+      margin-bottom: 14px;
+      line-height: 1.7;
+    }
+    .hero-proof {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 38px;
+    }
+    .hero-proof strong { color: #9ca3af; }
+    .hero-ctas {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn-primary {
+      padding: 15px 30px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      background: var(--primary-h);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(224,93,56,0.35);
+    }
+    .btn-outline {
+      padding: 15px 28px;
+      background: transparent;
+      color: var(--text);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-outline:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.04);
+      transform: translateY(-2px);
+    }
+    .cta-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    /* Mini dashboard */
+    .hero-dashboard {
+      margin-top: 64px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+    }
+    .hero-dashboard::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: radial-gradient(ellipse 500px 200px at 50% 0%, rgba(224,93,56,0.05), transparent);
+      pointer-events: none;
+    }
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .dashboard-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .dashboard-kpis { display: flex; gap: 24px; }
+    .kpi { text-align: right; }
+    .kpi-val { font-size: 22px; font-weight: 700; font-family: 'Source Serif 4', serif; }
+    .kpi-val.green { color: var(--success); }
+    .kpi-val.orange { color: var(--primary); }
+    .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .agent-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .agent-avatar {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .agent-info { flex: 1; min-width: 0; }
+    .agent-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .agent-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+    .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .status-running { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
+    .status-running::before { background: var(--success); animation: pulse-status 1.5s ease-in-out infinite; }
+    .status-error { background: rgba(239,68,68,0.12); color: var(--error); border: 1px solid rgba(239,68,68,0.25); }
+    .status-error::before { background: var(--error); animation: pulse-status 0.8s ease-in-out infinite; }
+    .status-paused { background: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
+    .status-paused::before { background: var(--warning); }
+    .status-idle { background: rgba(107,114,128,0.15); color: var(--muted); border: 1px solid rgba(107,114,128,0.2); }
+    .status-idle::before { background: var(--muted); }
+    @keyframes pulse-status {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    /* ── LOGOS ───────────────────────────────────────────────────── */
+    .logos-section {
+      padding: 36px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .logos-label { text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 20px; }
+    .logos-row { display: flex; align-items: center; justify-content: center; gap: 44px; flex-wrap: wrap; }
+    .logo-pill {
+      padding: 6px 18px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      font-size: 13px;
+      font-weight: 600;
+      color: #9ca3af;
+      letter-spacing: 0.03em;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .logo-pill:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+    /* ── SECTIONS ────────────────────────────────────────────────── */
+    section { padding: 96px 0; }
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Source Serif 4', serif;
+      font-size: clamp(28px, 4vw, 46px);
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -0.015em;
+      margin-bottom: 20px;
+    }
+    .section-sub { font-size: 17px; color: #9ca3af; max-width: 560px; line-height: 1.7; }
+
+    /* ── INCIDENT COUNTER — social proof bar ─────────────────────── */
+    .alert-bar {
+      background: rgba(239,68,68,0.07);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 40px;
+      max-width: 640px;
+    }
+    .alert-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--error);
+      flex-shrink: 0;
+      animation: pulse-status 1s ease-in-out infinite;
+    }
+    .alert-bar span { font-size: 13px; color: #f87171; }
+    .alert-bar strong { color: #fca5a5; }
+
+    /* ── PROBLÈME ────────────────────────────────────────────────── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 20px;
+      margin-top: 56px;
+    }
+    .problem-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      transition: border-color 0.25s, transform 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .problem-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(239,68,68,0.5), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .problem-card:hover { border-color: rgba(239,68,68,0.3); transform: translateY(-4px); }
+    .problem-card:hover::after { opacity: 1; }
+    .problem-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .problem-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 10px; line-height: 1.3; }
+    .problem-card p { font-size: 14px; color: #9ca3af; line-height: 1.65; }
+    .problem-cost {
+      margin-top: 16px;
+      padding: 10px 14px;
+      background: rgba(239,68,68,0.07);
+      border-radius: 8px;
+      border: 1px solid rgba(239,68,68,0.15);
+      font-size: 12px;
+      color: #f87171;
+      font-weight: 500;
+    }
+
+    /* ── SOLUTION ────────────────────────────────────────────────── */
+    .solution-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 28px;
+      margin-top: 56px;
+    }
+    .solution-col {
+      padding: 32px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.25s, transform 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .solution-col::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(134,167,200,0.6), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .solution-col:hover { border-color: rgba(134,167,200,0.35); transform: translateY(-4px); }
+    .solution-col:hover::after { opacity: 1; }
+    .solution-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: rgba(134,167,200,0.1);
+      border: 1px solid rgba(134,167,200,0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+    .solution-col h3 { font-family: 'Source Serif 4', serif; font-size: 21px; font-weight: 600; margin-bottom: 10px; }
+    .solution-col .outcome { font-size: 13px; color: var(--blue); font-weight: 500; margin-bottom: 10px; }
+    .solution-col p { font-size: 14px; color: #9ca3af; line-height: 1.65; }
+
+    /* ── BENTO ───────────────────────────────────────────────────── */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      gap: 16px;
+      margin-top: 56px;
+    }
+    .bento-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .bento-card:hover { border-color: rgba(224,93,56,0.28); transform: translateY(-3px); }
+    .bento-card.large { grid-column: span 2; }
+    .bento-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+    }
+    .tag-primary { background: rgba(224,93,56,0.15); color: var(--primary); border: 1px solid rgba(224,93,56,0.25); }
+    .tag-blue { background: rgba(134,167,200,0.12); color: var(--blue); border: 1px solid rgba(134,167,200,0.25); }
+    .tag-green { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
+    .bento-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .bento-card .bento-outcome { font-size: 12px; color: var(--primary); font-weight: 500; margin-bottom: 10px; }
+    .bento-card p { font-size: 13px; color: #9ca3af; line-height: 1.6; }
+    .bento-visual {
+      margin-top: 20px;
+      height: 80px;
+      border-radius: 8px;
+      background: var(--bg3);
+      overflow: hidden;
+      position: relative;
+    }
+    .bento-chart {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      padding: 8px;
+    }
+    .bar {
+      flex: 1;
+      border-radius: 3px 3px 0 0;
+      background: rgba(224,93,56,0.4);
+      animation: bar-grow 0.8s ease forwards;
+      transform-origin: bottom;
+      transform: scaleY(0);
+    }
+    @keyframes bar-grow { to { transform: scaleY(1); } }
+
+    /* ── TESTIMONIAL ─────────────────────────────────────────────── */
+    .testimonial-section { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .testimonial-inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 72px;
+      align-items: center;
+    }
+    blockquote {
+      font-family: 'Source Serif 4', serif;
+      font-size: clamp(20px, 2.5vw, 28px);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--text);
+      border-left: 3px solid var(--primary);
+      padding-left: 28px;
+    }
+    .quote-author {
+      margin-top: 20px;
+      padding-left: 28px;
+      font-size: 13px;
+      font-style: normal;
+      font-family: 'Inter', sans-serif;
+      color: var(--muted);
+    }
+    .quote-author strong { color: #9ca3af; font-weight: 500; }
+    .stats-col { display: flex; flex-direction: column; gap: 32px; min-width: 210px; }
+    .stat-val {
+      font-family: 'Source Serif 4', serif;
+      font-size: 40px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+    /* ── PRICING ─────────────────────────────────────────────────── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 20px;
+      margin-top: 56px;
+      align-items: start;
+    }
+    .pricing-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      transition: border-color 0.25s, transform 0.25s;
+      position: relative;
+    }
+    .pricing-card:hover { transform: translateY(-5px); }
+    .pricing-card.recommended {
+      border-color: var(--primary);
+      background: linear-gradient(145deg, rgba(224,93,56,0.07) 0%, var(--bg2) 55%);
+    }
+    .recommended-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 3px 16px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .pricing-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 16px; }
+    .pricing-price { font-family: 'Source Serif 4', serif; font-size: 44px; font-weight: 700; color: var(--text); line-height: 1; }
+    .pricing-price sup { font-size: 22px; vertical-align: super; }
+    .pricing-price span { font-size: 14px; font-family: 'Inter', sans-serif; color: var(--muted); font-weight: 400; }
+    .pricing-roi {
+      margin: 14px 0 4px;
+      padding: 8px 12px;
+      background: rgba(34,197,94,0.07);
+      border: 1px solid rgba(34,197,94,0.18);
+      border-radius: 6px;
+      font-size: 12px;
+      color: #86efac;
+    }
+    .pricing-desc { font-size: 13px; color: var(--muted); margin: 14px 0; line-height: 1.6; }
+    .pricing-features { margin: 20px 0 28px; display: flex; flex-direction: column; gap: 11px; }
+    .pricing-feature { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #9ca3af; }
+    .check {
+      width: 17px; height: 17px;
+      border-radius: 50%;
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .check svg { width: 8px; height: 8px; }
+    .btn-pricing {
+      width: 100%;
+      padding: 13px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-pricing.primary { background: var(--primary); color: #fff; }
+    .btn-pricing.primary:hover { background: var(--primary-h); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(224,93,56,0.35); }
+    .btn-pricing.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-pricing.ghost:hover { border-color: rgba(255,255,255,0.22); background: rgba(255,255,255,0.04); }
+
+    /* ── CTA FORM ────────────────────────────────────────────────── */
+    .cta-section { background: var(--bg2); border-top: 1px solid var(--border); }
+    .cta-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .cta-left .section-title { margin-bottom: 16px; }
+    .cta-left p { font-size: 15px; color: #9ca3af; line-height: 1.7; margin-bottom: 28px; }
+    .trust-items { display: flex; flex-direction: column; gap: 12px; }
+    .trust-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #9ca3af; }
+    .trust-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--success); }
+    .form-wrapper {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+    }
+    .form-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .form-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .form { display: flex; flex-direction: column; gap: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; font-weight: 500; color: #9ca3af; }
+    .form-group input, .form-group select {
+      padding: 12px 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+    .form-group input::placeholder { color: var(--muted); }
+    .form-group select option { background: var(--bg2); }
+    .form-footer-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; }
+    .form-success {
+      display: none;
+      padding: 24px;
+      background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: var(--radius-sm);
+      color: var(--success);
+      font-size: 14px;
+      text-align: center;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+    .form-success.visible { display: block; }
+
+    /* ── FOOTER ─────────────────────────────────────────────────── */
+    footer { padding: 48px 0; border-top: 1px solid var(--border); }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+    .footer-logo { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 700; }
+    .footer-logo span { color: var(--primary); }
+    .footer-tagline { font-size: 12px; color: var(--muted); margin-top: 5px; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: var(--muted); transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--muted); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────────── */
+    @media (max-width: 920px) {
+      .nav-links { display: none; }
+      .bento { grid-template-columns: 1fr 1fr; }
+      .bento-card.large { grid-column: span 2; }
+      .testimonial-inner { grid-template-columns: 1fr; gap: 44px; }
+      .stats-col { flex-direction: row; flex-wrap: wrap; gap: 28px; }
+      .cta-inner { grid-template-columns: 1fr; gap: 48px; }
+    }
+    @media (max-width: 620px) {
+      .hero { padding: 60px 0 48px; }
+      .bento { grid-template-columns: 1fr; }
+      .bento-card.large { grid-column: span 1; }
+      .form-row { grid-template-columns: 1fr; }
+      .dashboard-kpis { display: none; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .form-wrapper { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ──────────────────────────────────────────────────────── -->
+  <nav>
+    <div class="container">
+      <div class="nav-inner">
+        <a href="#" class="nav-logo">Claire<span> · </span>Observability</a>
+        <ul class="nav-links">
+          <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#pricing">Tarifs</a></li>
+          <li><a href="#demo">Démo</a></li>
+        </ul>
+        <a href="#demo" class="btn-nav">Voir mes agents en direct →</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="container">
+      <div class="hero-content">
+
+        <!-- Alerte contextuelle — social proof + urgency -->
+        <div class="alert-bar">
+          <div class="alert-dot"></div>
+          <span><strong>89% des équipes ops</strong> qui déploient des agents n'ont aucune visibilité sur leurs erreurs en temps réel.</span>
+        </div>
+
+        <h1>Certains de vos agents<br>font des erreurs <em>en ce moment.</em><br>Vous ne le savez pas encore.</h1>
+        <p class="hero-sub">
+          Claire est la première plateforme d'observabilité IA pensée pour les directeurs ops, pas pour les développeurs. Voyez, comprenez et agissez sur chaque agent — en 30 minutes, sans ligne de code.
+        </p>
+        <p class="hero-proof">Fonctionne avec <strong>Make, n8n, Claude, OpenAI</strong> — sans modifier votre stack actuel.</p>
+        <div class="hero-ctas">
+          <a href="#demo" class="btn-primary">Voir mes agents en temps réel →</a>
+          <a href="#features" class="btn-outline">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            Voir la démo en 3 min
+          </a>
+        </div>
+        <p class="cta-note">Démo gratuite · Aucune carte bancaire · Réponse sous 24h</p>
+      </div>
+
+      <!-- Mini dashboard animé -->
+      <div class="hero-dashboard fade-in">
+        <div class="dashboard-header">
+          <span class="dashboard-title">Claire — Tableau de bord agents</span>
+          <div class="dashboard-kpis">
+            <div class="kpi">
+              <div class="kpi-val green">98.2%</div>
+              <div class="kpi-label">Uptime</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-val orange">3</div>
+              <div class="kpi-label">Alertes actives</div>
+            </div>
+          </div>
+        </div>
+        <div class="agents-grid">
+          <div class="agent-card">
+            <div class="agent-avatar" style="background:rgba(34,197,94,0.12)">🛒</div>
+            <div class="agent-info">
+              <div class="agent-name">Agent Commandes</div>
+              <div class="agent-sub">Make · 142 exécutions/h</div>
+            </div>
+            <span class="status-badge status-running">Running</span>
+          </div>
+          <div class="agent-card">
+            <div class="agent-avatar" style="background:rgba(239,68,68,0.12)">📧</div>
+            <div class="agent-info">
+              <div class="agent-name">Agent Email SAV</div>
+              <div class="agent-sub">n8n · dernière erreur : 4 min</div>
+            </div>
+            <span class="status-badge status-error">Error</span>
+          </div>
+          <div class="agent-card">
+            <div class="agent-avatar" style="background:rgba(245,158,11,0.12)">📦</div>
+            <div class="agent-info">
+              <div class="agent-name">Agent Stock</div>
+              <div class="agent-sub">Claude · throttlé manuellement</div>
+            </div>
+            <span class="status-badge status-paused">Paused</span>
+          </div>
+          <div class="agent-card">
+            <div class="agent-avatar" style="background:rgba(107,114,128,0.12)">📊</div>
+            <div class="agent-info">
+              <div class="agent-name">Agent Reporting</div>
+              <div class="agent-sub">OpenAI · hors plage horaire</div>
+            </div>
+            <span class="status-badge status-idle">Idle</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── LOGOS ─────────────────────────────────────────────────────── -->
+  <div class="logos-section">
+    <div class="container">
+      <p class="logos-label">S'intègre nativement avec vos outils actuels</p>
+      <div class="logos-row">
+        <span class="logo-pill">Make</span>
+        <span class="logo-pill">n8n</span>
+        <span class="logo-pill">Claude</span>
+        <span class="logo-pill">OpenAI</span>
+        <span class="logo-pill">Gemini</span>
+        <span class="logo-pill">Zapier</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROBLÈME — PAS framework ──────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <div class="fade-in">
+        <p class="section-label">Le problème</p>
+        <h2 class="section-title">Vous avez automatisé votre ops.<br>Mais qui surveille les automatisations ?</h2>
+        <p class="section-sub">Les agents IA travaillent en silence. Quand ils échouent, vous l'apprenez trop tard — et vous payez pour chaque minute d'invisibilité.</p>
+      </div>
+      <div class="problem-grid">
+        <div class="problem-card fade-in">
+          <div class="problem-icon">🔇</div>
+          <h3>Vos erreurs les plus coûteuses sont celles que vous ne voyez pas</h3>
+          <p>Un agent en boucle depuis 3 heures. Un prompt qui renvoie des réponses hors-sujet depuis lundi. Vous l'apprenez quand un client se plaint — ou quand la facture cloud arrive.</p>
+          <div class="problem-cost">Coût moyen d'un incident non détecté : 4 à 8h de diagnostic</div>
+        </div>
+        <div class="problem-card fade-in">
+          <div class="problem-icon">🧩</div>
+          <h3>Diagnostiquer un agent qui déraille prend des heures — sans les bons outils</h3>
+          <p>Pas de logs lisibles, pas de contexte, pas de timeline. Quand quelque chose cloche dans votre Make ou n8n, retrouver la cause racine ressemble à chercher une aiguille dans une meule de foin.</p>
+          <div class="problem-cost">Résultat : la moitié des incidents restent inexpliqués</div>
+        </div>
+        <div class="problem-card fade-in">
+          <div class="problem-icon">⛔</div>
+          <h3>Chaque action corrective passe par un développeur — que vous n'avez pas</h3>
+          <p>Mettre un agent en pause. Réduire son débit. Revenir à la version précédente. Des opérations de 30 secondes qui prennent 3 jours faute de disponibilité technique.</p>
+          <div class="problem-cost">Votre agilité opérationnelle dépend d'une ressource externe</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SOLUTION ──────────────────────────────────────────────────── -->
+  <section style="background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <div class="fade-in">
+        <p class="section-label">La solution</p>
+        <h2 class="section-title">De l'invisibilité totale<br>à la maîtrise complète — en 30 min</h2>
+        <p class="section-sub">Claire vous donne les instruments de contrôle que vous auriez dû avoir dès le premier agent déployé. Sans écrire une seule ligne de code.</p>
+      </div>
+      <div class="solution-cols">
+        <div class="solution-col fade-in">
+          <div class="solution-icon">
+            <svg width="24" height="24" fill="none" stroke="#86a7c8" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h3>Observez</h3>
+          <p class="outcome">Sachez ce qui se passe — avant vos clients</p>
+          <p>Dashboard live avec KPIs, logs en temps réel et alertes instantanées. Chaque anomalie est détectée et signalée en moins de 60 secondes.</p>
+        </div>
+        <div class="solution-col fade-in">
+          <div class="solution-icon">
+            <svg width="24" height="24" fill="none" stroke="#86a7c8" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v3l2 2"/></svg>
+          </div>
+          <h3>Comprenez</h3>
+          <p class="outcome">Passez de 4h de diagnostic à 1 clic</p>
+          <p>Analyse Root Cause automatique avec timeline, impact estimé et contexte complet. Finis les allers-retours avec votre développeur pour comprendre ce qui s'est passé.</p>
+        </div>
+        <div class="solution-col fade-in">
+          <div class="solution-icon">
+            <svg width="24" height="24" fill="none" stroke="#86a7c8" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3>Agissez</h3>
+          <p class="outcome">Reprenez le contrôle sans dépendance technique</p>
+          <p>Pause, throttle, rollback, playbooks de remédiation — directement depuis l'interface. Vous êtes autonome. Votre développeur peut se concentrer sur ce qui compte.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES BENTO ────────────────────────────────────────────── -->
+  <section id="features">
+    <div class="container">
+      <div class="fade-in">
+        <p class="section-label">Capacités de la plateforme</p>
+        <h2 class="section-title">Une infrastructure de contrôle conçue pour les opérateurs —<br>pas pour les ingénieurs.</h2>
+      </div>
+      <div class="bento">
+
+        <div class="bento-card large fade-in">
+          <span class="bento-tag tag-primary">Live</span>
+          <h3>Dashboard temps réel — zéro latence</h3>
+          <div class="bento-outcome">Vous voyez une anomalie avant qu'elle devienne un incident</div>
+          <p>Logs en direct, KPIs par agent, score de santé global avec seuils d'alerte configurables. L'état de toute votre stack IA en un coup d'oeil — toujours à jour.</p>
+          <div class="bento-visual">
+            <div class="bento-chart">
+              <div class="bar" style="height:30%;animation-delay:0s"></div>
+              <div class="bar" style="height:55%;animation-delay:0.1s"></div>
+              <div class="bar" style="height:45%;animation-delay:0.2s"></div>
+              <div class="bar" style="height:80%;animation-delay:0.3s"></div>
+              <div class="bar" style="height:60%;animation-delay:0.4s"></div>
+              <div class="bar" style="height:90%;animation-delay:0.5s"></div>
+              <div class="bar" style="height:70%;animation-delay:0.6s"></div>
+              <div class="bar" style="height:50%;animation-delay:0.7s;background:rgba(239,68,68,0.5)"></div>
+              <div class="bar" style="height:40%;animation-delay:0.8s"></div>
+              <div class="bar" style="height:65%;animation-delay:0.9s"></div>
+              <div class="bar" style="height:85%;animation-delay:1s"></div>
+              <div class="bar" style="height:75%;animation-delay:1.1s"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bento-card fade-in">
+          <span class="bento-tag tag-blue">RCA</span>
+          <h3>Root Cause Analysis automatique</h3>
+          <div class="bento-outcome">4h de debug → 1 clic</div>
+          <p>Claire identifie la cause racine, l'impact sur votre activité et génère les étapes de résolution — sans avoir à plonger dans des logs illisibles.</p>
+        </div>
+
+        <div class="bento-card fade-in">
+          <span class="bento-tag tag-green">Sécurité</span>
+          <h3>Guardrails IA — protection continue</h3>
+          <div class="bento-outcome">Bloquez les risques avant qu'ils causent des dégâts</div>
+          <p>Détection PII, injection de prompt, contenu hors-conformité. Des toggles simples, pas de configuration technique.</p>
+        </div>
+
+        <div class="bento-card fade-in">
+          <span class="bento-tag tag-primary">Action</span>
+          <h3>Playbooks de remédiation guidés</h3>
+          <div class="bento-outcome">Résolvez sans appeler votre dev</div>
+          <p>Étapes actionnables adaptées à chaque type d'incident. Cliquez, validez, résolvez. Autonomie totale sur vos agents.</p>
+        </div>
+
+        <div class="bento-card large fade-in">
+          <span class="bento-tag tag-blue">Gouvernance</span>
+          <h3>Score AgentOps — vos agents font-ils vraiment leur travail ?</h3>
+          <div class="bento-outcome">Passez de "ça tourne" à "ça performe comme attendu"</div>
+          <p>Métriques de fiabilité de niveau entreprise : instruction adherence, tool accuracy, context relevance, answer correctness. Savoir que vos agents font ce qu'ils sont censés faire — pas juste qu'ils s'exécutent.</p>
+        </div>
+
+        <div class="bento-card fade-in">
+          <span class="bento-tag tag-green">Audit</span>
+          <h3>Piste d'audit complète</h3>
+          <div class="bento-outcome">Répondez à "qui a fait quoi" en secondes</div>
+          <p>Timeline horodatée de chaque action sur chaque agent. Export disponible pour vos besoins de conformité.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TESTIMONIAL + STATS ────────────────────────────────────────── -->
+  <section class="testimonial-section">
+    <div class="container">
+      <div class="testimonial-inner fade-in">
+        <div>
+          <blockquote>
+            "Avant Claire, je découvrais les incidents quand les clients se plaignaient. Maintenant je les résous avant que quelqu'un le remarque. C'est la différence entre subir son ops et le piloter."
+          </blockquote>
+          <p class="quote-author"><strong>Directrice E-commerce, ETI française</strong> — 12 agents Make + Claude en production</p>
+        </div>
+        <div class="stats-col">
+          <div>
+            <div class="stat-val">$6.8B</div>
+            <div class="stat-label">Taille du marché LLM observabilité d'ici 2029 (CAGR 36%)</div>
+          </div>
+          <div>
+            <div class="stat-val">89%</div>
+            <div class="stat-label">Des organisations déploient des agents en production sans visibilité</div>
+          </div>
+          <div>
+            <div class="stat-val">0</div>
+            <div class="stat-label">Développeur requis pour utiliser Claire au quotidien</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ────────────────────────────────────────────────────── -->
+  <section id="pricing">
+    <div class="container">
+      <div class="fade-in" style="text-align:center; max-width:620px; margin:0 auto;">
+        <p class="section-label">Investissement</p>
+        <h2 class="section-title">Un prix qui reflète la valeur —<br>et se rembourse dès le premier incident évité.</h2>
+        <p class="section-sub" style="margin:0 auto;">Tous les plans incluent la formation, le support et le kit de démarrage client. Sans contrat annuel.</p>
+      </div>
+
+      <!-- 4 cartes pricing -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:20px; margin-top:56px; align-items:start;">
+
+        <!-- Pilote -->
+        <div class="pricing-card fade-in">
+          <div class="pricing-name">Pilote</div>
+          <div class="pricing-price"><sup>€</sup>890<span>/mois</span></div>
+          <div style="margin:10px 0 4px; padding:6px 12px; background:rgba(224,93,56,0.1); border:1px solid rgba(224,93,56,0.2); border-radius:6px; font-size:11px; color:var(--primary); font-weight:600;">1er mois offert — sans engagement</div>
+          <div class="pricing-roi">Un agent SAV en erreur 4h non détectée = ~800 € de coûts cachés. Claire Pilote : 890 €/mois.</div>
+          <p class="pricing-desc">Pour les PME qui commencent leur démarche d'observabilité IA. Opérationnel en 1 semaine.</p>
+          <ul class="pricing-features">
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Jusqu'à 8 agents surveillés</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Dashboard live + alertes email</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Root Cause Analysis automatique</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Kit de démarrage + formation inclus</li>
+          </ul>
+          <button class="btn-pricing ghost" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Démarrer avec Pilote</button>
+        </div>
+
+        <!-- Équipe (recommandé) -->
+        <div class="pricing-card recommended fade-in">
+          <div class="recommended-badge">Le plus choisi</div>
+          <div class="pricing-name">Équipe</div>
+          <div class="pricing-price"><sup>€</sup>2 490<span>/mois</span></div>
+          <div class="pricing-roi">Nos clients évitent en moyenne 3 incidents critiques/mois → économie estimée : 4 500 €/mois. ROI ×1.8 dès le 1er mois.</div>
+          <p class="pricing-desc">Pour les équipes ops en croissance qui gèrent plusieurs automatisations en production.</p>
+          <ul class="pricing-features">
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Jusqu'à 30 agents surveillés</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Dashboard live + alertes email/Slack</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>RCA + Playbooks de remédiation</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Guardrails IA (PII, injection, faithfulness)</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Score gouvernance AgentOps</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Kit de démarrage + formation (4h) inclus</li>
+          </ul>
+          <button class="btn-pricing primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Réserver ma démo →</button>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="pricing-card fade-in">
+          <div class="pricing-name">Enterprise</div>
+          <div class="pricing-price" style="font-size:32px;">À partir de<br><sup style="font-size:18px;">€</sup>5 900<span>/mois</span></div>
+          <div class="pricing-roi">1 incident critique = 8–24h d'équipe mobilisée (5 pers. × 500 €/j = jusqu'à 15 000 €). Claire Enterprise : 5 900 €/mois.</div>
+          <p class="pricing-desc">Pour les organisations qui opèrent à grande échelle avec des exigences de SLA, de conformité et d'intégration avancées.</p>
+          <ul class="pricing-features">
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Agents illimités</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>SLA 99,9% garanti</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Audit trail complet + export CSV/PDF</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Intégrations custom Make/n8n/API</li>
+            <li class="pricing-feature"><div class="check"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Support dédié 7j/7 + CSM attitré</li>
+          </ul>
+          <button class="btn-pricing ghost" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Contacter l'équipe</button>
+        </div>
+
+      </div>
+
+      <!-- Claire Launch — service en bas -->
+      <div class="fade-in" style="margin-top:24px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:28px 36px; display:flex; align-items:center; justify-content:space-between; gap:32px; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--primary); margin-bottom:8px;">Service optionnel</div>
+          <div style="font-size:18px; font-weight:700; margin-bottom:6px;">Claire Launch — <span style="color:var(--primary);">5 900 € unique</span></div>
+          <p style="font-size:13px; color:var(--muted); max-width:540px; line-height:1.6;">Déploiement dédié (1 instance = 1 client) + 2 jours de formation sur site + 3 mois d'accompagnement prioritaire inclus. Votre équipe est opérationnelle sans effort interne.</p>
+        </div>
+        <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})" style="white-space:nowrap; flex-shrink:0;">En savoir plus →</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── CTA FORMULAIRE ────────────────────────────────────────────── -->
+  <section class="cta-section" id="demo">
+    <div class="container">
+      <div class="cta-inner">
+
+        <div class="cta-left fade-in">
+          <p class="section-label">Réservez votre démo</p>
+          <h2 class="section-title">30 minutes pour reprendre<br>le contrôle de vos agents.</h2>
+          <p>On vous montre Claire en direct sur un scénario proche du vôtre. Pas une présentation générique — une démo personnalisée sur votre stack (Make, n8n, Claude, OpenAI).</p>
+          <div class="trust-items">
+            <div class="trust-item">
+              <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Démo 100% gratuite, sans engagement
+            </div>
+            <div class="trust-item">
+              <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Réponse sous 24h ouvrées
+            </div>
+            <div class="trust-item">
+              <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Aucun profil technique requis de votre côté
+            </div>
+            <div class="trust-item">
+              <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Vos données ne sont jamais partagées
+            </div>
+          </div>
+        </div>
+
+        <div class="fade-in">
+          <div class="form-wrapper">
+            <div class="form-title">Réservez votre démo</div>
+            <div class="form-subtitle">Rejoignez les équipes ops qui ont repris le contrôle de leurs agents.</div>
+            <form class="form" id="demo-form" onsubmit="handleSubmit(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prenom">Prénom</label>
+                  <input type="text" id="prenom" name="prenom" placeholder="Sophie" required>
+                </div>
+                <div class="form-group">
+                  <label for="entreprise">Entreprise</label>
+                  <input type="text" id="entreprise" name="entreprise" placeholder="Acme SAS" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="email">Email professionnel</label>
+                <input type="email" id="email" name="email" placeholder="sophie@acme.fr" required>
+              </div>
+              <div class="form-group">
+                <label for="agents">Combien d'agents pilotez-vous aujourd'hui ?</label>
+                <select id="agents" name="agents" required>
+                  <option value="" disabled selected>Sélectionner…</option>
+                  <option value="1-5">1 à 5 agents — je commence</option>
+                  <option value="6-20">6 à 20 agents — en croissance</option>
+                  <option value="20+">Plus de 20 agents — à grande échelle</option>
+                </select>
+              </div>
+              <button type="submit" class="btn-primary" style="width:100%;padding:15px;font-size:15px;justify-content:center;">Réserver ma démo de 30 min →</button>
+            </form>
+            <p class="form-footer-note">Aucune carte bancaire · Aucun engagement · Réponse sous 24h</p>
+            <div class="form-success" id="form-success">
+              Votre demande est bien enregistrée.<br>
+              <strong style="color:#86efac">Nous vous contactons sous 24h</strong> pour planifier votre démo personnalisée.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">Claire<span> · </span>Observability</div>
+          <div class="footer-tagline">L'observabilité IA pour les équipes qui agissent.</div>
+        </div>
+        <ul class="footer-links">
+          <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#pricing">Tarifs</a></li>
+          <li><a href="#demo">Démo</a></li>
+          <li><a href="mailto:contact@claire-observability.io">Contact</a></li>
+        </ul>
+        <div class="footer-copy">© 2026 Claire Observability. Tous droits réservés.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll fade-in avec stagger par groupe
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach((el, i) => {
+      el.style.transitionDelay = `${(i % 5) * 0.07}s`;
+      observer.observe(el);
+    });
+
+    // Formulaire
+    function handleSubmit(e) {
+      e.preventDefault();
+      const form = document.getElementById('demo-form');
+      const note = document.querySelector('.form-footer-note');
+      const success = document.getElementById('form-success');
+      form.style.display = 'none';
+      if (note) note.style.display = 'none';
+      success.classList.add('visible');
+    }
+  </script>
+
+</body>
+</html>
