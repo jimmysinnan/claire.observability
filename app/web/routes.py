@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.agents.registry import list_agents, recent_logs
@@ -140,20 +140,10 @@ templates.env.filters["hex_to_rgb"] = _hex_to_rgb
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 
-@router.get("/", response_class=HTMLResponse)
-async def landing_page(request: Request) -> HTMLResponse:
-    snapshot = pipeline.metrics.snapshot()
-    agents = list_agents()
-    running = sum(1 for a in agents if a.status.value == "running")
-    return templates.TemplateResponse(
-        request,
-        "landing.html",
-        {
-            "snapshot": snapshot,
-            "agents_total": len(agents),
-            "agents_running": running,
-        },
-    )
+@router.get("/", response_class=RedirectResponse)
+async def root_redirect() -> RedirectResponse:
+    """L'entrée produit redirige vers le dashboard — la landing marketing est indépendante."""
+    return RedirectResponse(url="/dashboard", status_code=302)
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
