@@ -4,11 +4,13 @@ from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from prometheus_client import generate_latest
 
 from app.agents.registry import emit_log, _seed_demo_agents
 from app.api.routes import router
+from app.core.database import init_db
 from app.core.logging import configure_logging
 from app.core.telemetry import configure_telemetry
 from app.integrations.manager import init_integrations
@@ -24,6 +26,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Startup
+    init_db()
     init_integrations()
     _seed_demo_agents()
     emit_log("Claire Observability démarrée", level=LogLevel.success, source="system")
@@ -33,6 +36,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="Claire AI Observability", version="1.0.0", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(router, prefix="/api/v1", tags=["api"])
 app.include_router(web_router, tags=["web"])
 app.mount("/static", StaticFiles(directory="app/web/static"), name="static")

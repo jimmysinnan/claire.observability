@@ -1,6 +1,7 @@
 """
 AgentRegistry — source de vérité pour tous les agents observés.
 Gère le cycle de vie, les runs, et le broadcast WebSocket en temps réel.
+Agents et runs sont persistés en SQLite. Le bus de logs live reste en mémoire.
 """
 import asyncio
 import json
@@ -11,7 +12,10 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import WebSocket
+from sqlmodel import Session, select
 
+from app.core.database import engine
+from app.models.db_models import AgentDB, AgentRunDB, AuditEntryDB, LogEntryDB
 from app.models.schemas import (
     Agent,
     AgentRun,
@@ -23,7 +27,7 @@ from app.models.schemas import (
 
 logger = logging.getLogger(__name__)
 
-# ─── Live Log Bus ─────────────────────────────────────────────────────────────
+# ─── Live Log Bus (in-memory, temps réel uniquement) ─────────────────────────
 
 _log_bus: deque[LogEntry] = deque(maxlen=1000)
 _ws_clients: list[WebSocket] = []
@@ -70,6 +74,20 @@ def emit_log(
         details=details or {},
     )
     _log_bus.append(entry)
+    # Persist to SQLite
+    with Session(engine) as session:
+        db_entry = LogEntryDB(
+            log_id=entry.log_id,
+            timestamp=entry.timestamp,
+            level=entry.level.value,
+            source=entry.source,
+            agent_id=entry.agent_id,
+            integration=entry.integration.value if entry.integration else None,
+            message=entry.message,
+            details_json=json.dumps(entry.details),
+        )
+        session.add(db_entry)
+        session.commit()
     asyncio.create_task(
         broadcast({"type": "log", "data": entry.model_dump(mode="json")})
     )
@@ -80,10 +98,46 @@ def recent_logs(limit: int = 200) -> list[LogEntry]:
     return list(_log_bus)[-limit:]
 
 
-# ─── Agent Registry ───────────────────────────────────────────────────────────
+# ─── Helpers DB → Schema ──────────────────────────────────────────────────────
 
-_agents: dict[str, Agent] = {}
-_runs: dict[str, list[AgentRun]] = {}
+
+def _agent_from_db(db: AgentDB) -> Agent:
+    return Agent(
+        agent_id=db.agent_id,
+        name=db.name,
+        integration=IntegrationSource(db.integration),
+        status=AgentStatus(db.status),
+        current_task=db.current_task,
+        runs_today=db.runs_today,
+        errors_today=db.errors_today,
+        success_rate=db.success_rate,
+        last_run_at=db.last_run_at,
+        created_at=db.created_at,
+        tags=json.loads(db.tags_json),
+        webhook_secret=db.webhook_secret,
+        # Extra fields passed via model_config extra="allow"
+        latency_ms=db.latency_ms,
+        events_total=db.events_total,
+        anomalies_count=db.anomalies_count,
+        health_score=db.health_score,
+    )
+
+
+def _run_from_db(db: AgentRunDB) -> AgentRun:
+    return AgentRun(
+        run_id=db.run_id,
+        agent_id=db.agent_id,
+        status=db.status,
+        started_at=db.started_at,
+        finished_at=db.finished_at,
+        duration_ms=db.duration_ms,
+        trigger=db.trigger,
+        output=json.loads(db.output_json),
+        error=db.error,
+    )
+
+
+# ─── Agent Registry ───────────────────────────────────────────────────────────
 
 
 def _broadcast_agent(agent: Agent) -> None:
@@ -98,14 +152,18 @@ def register_agent(
     tags: list[str] | None = None,
 ) -> Agent:
     agent_id = str(uuid.uuid4())
-    agent = Agent(
+    db_agent = AgentDB(
         agent_id=agent_id,
         name=name,
-        integration=integration,
-        tags=tags or [],
+        integration=integration.value,
+        tags_json=json.dumps(tags or []),
     )
-    _agents[agent_id] = agent
-    _runs[agent_id] = []
+    with Session(engine) as session:
+        session.add(db_agent)
+        session.commit()
+        session.refresh(db_agent)
+
+    agent = _agent_from_db(db_agent)
     emit_log(
         f"Agent '{name}' enregistré ({integration.value})",
         level=LogLevel.info,
@@ -118,11 +176,17 @@ def register_agent(
 
 
 def get_agent(agent_id: str) -> Agent | None:
-    return _agents.get(agent_id)
+    with Session(engine) as session:
+        db_agent = session.get(AgentDB, agent_id)
+        if db_agent is None:
+            return None
+        return _agent_from_db(db_agent)
 
 
 def list_agents() -> list[Agent]:
-    return list(_agents.values())
+    with Session(engine) as session:
+        agents = session.exec(select(AgentDB)).all()
+        return [_agent_from_db(a) for a in agents]
 
 
 def update_agent_status(
@@ -130,19 +194,25 @@ def update_agent_status(
     status: AgentStatus,
     current_task: str | None = None,
 ) -> Agent | None:
-    agent = _agents.get(agent_id)
-    if not agent:
-        return None
-    agent.status = status
-    agent.current_task = current_task
-    if status == AgentStatus.running:
-        agent.runs_today += 1
-        agent.last_run_at = datetime.utcnow()
-    elif status == AgentStatus.error:
-        agent.errors_today += 1
-    total = agent.runs_today
-    errors = agent.errors_today
-    agent.success_rate = round((total - errors) / total * 100, 1) if total else 100.0
+    with Session(engine) as session:
+        db_agent = session.get(AgentDB, agent_id)
+        if db_agent is None:
+            return None
+        db_agent.status = status.value
+        db_agent.current_task = current_task
+        if status == AgentStatus.running:
+            db_agent.runs_today += 1
+            db_agent.last_run_at = datetime.utcnow()
+        elif status == AgentStatus.error:
+            db_agent.errors_today += 1
+        total = db_agent.runs_today
+        errors = db_agent.errors_today
+        db_agent.success_rate = round((total - errors) / total * 100, 1) if total else 100.0
+        session.add(db_agent)
+        session.commit()
+        session.refresh(db_agent)
+        agent = _agent_from_db(db_agent)
+
     _broadcast_agent(agent)
     return agent
 
@@ -155,20 +225,26 @@ def record_run(
     output: dict[str, Any] | None = None,
     error: str | None = None,
 ) -> AgentRun | None:
-    agent = _agents.get(agent_id)
+    agent = get_agent(agent_id)
     if not agent:
         return None
-    run = AgentRun(
-        run_id=str(uuid.uuid4()),
+    run_id = str(uuid.uuid4())
+    db_run = AgentRunDB(
+        run_id=run_id,
         agent_id=agent_id,
         status=status,
         finished_at=datetime.utcnow() if status != "running" else None,
         duration_ms=duration_ms,
         trigger=trigger,
-        output=output or {},
+        output_json=json.dumps(output or {}),
         error=error,
     )
-    _runs.setdefault(agent_id, []).append(run)
+    with Session(engine) as session:
+        session.add(db_run)
+        session.commit()
+        session.refresh(db_run)
+        run = _run_from_db(db_run)
+
     level = LogLevel.success if status == "success" else (
         LogLevel.error if status == "error" else LogLevel.info
     )
@@ -178,21 +254,31 @@ def record_run(
         source=agent.integration.value,
         agent_id=agent_id,
         integration=agent.integration,
-        details={"run_id": run.run_id, "trigger": trigger},
+        details={"run_id": run_id, "trigger": trigger},
     )
     return run
 
 
 def get_runs(agent_id: str, limit: int = 20) -> list[AgentRun]:
-    return list(_runs.get(agent_id, []))[-limit:]
+    with Session(engine) as session:
+        runs = session.exec(
+            select(AgentRunDB)
+            .where(AgentRunDB.agent_id == agent_id)
+            .order_by(AgentRunDB.started_at.desc())
+            .limit(limit)
+        ).all()
+        return [_run_from_db(r) for r in runs]
 
 
 def delete_agent(agent_id: str) -> bool:
-    if agent_id not in _agents:
-        return False
-    name = _agents[agent_id].name
-    del _agents[agent_id]
-    _runs.pop(agent_id, None)
+    with Session(engine) as session:
+        db_agent = session.get(AgentDB, agent_id)
+        if db_agent is None:
+            return False
+        name = db_agent.name
+        session.delete(db_agent)
+        session.commit()
+
     emit_log(
         f"Agent '{name}' supprimé",
         level=LogLevel.warning,
@@ -202,8 +288,37 @@ def delete_agent(agent_id: str) -> bool:
     return True
 
 
+def record_audit(
+    agent_id: str,
+    agent_name: str,
+    action: str,
+    user: str = "system",
+    kind: str = "info",
+) -> AuditEntryDB:
+    db_entry = AuditEntryDB(
+        agent_id=agent_id,
+        agent_name=agent_name,
+        action=action,
+        user=user,
+        kind=kind,
+    )
+    with Session(engine) as session:
+        session.add(db_entry)
+        session.commit()
+        session.refresh(db_entry)
+    return db_entry
+
+
 def _seed_demo_agents() -> None:
-    """Peuple quelques agents de démonstration au démarrage."""
+    """Peuple quelques agents de démonstration au démarrage (idempotent)."""
+    # Ne pas reseed si des agents existent déjà
+    with Session(engine) as session:
+        existing = session.exec(select(AgentDB)).first()
+        if existing:
+            return
+
+    import random
+
     demos = [
         ("n8n Automation", IntegrationSource.n8n, ["automation", "demo"], AgentStatus.running, "Traitement webhook Stripe"),
         ("Claude Assistant", IntegrationSource.claude, ["ai", "support"], AgentStatus.idle, None),
@@ -213,12 +328,21 @@ def _seed_demo_agents() -> None:
     ]
     for name, integration, tags, status, task in demos:
         agent = register_agent(name, integration, tags)
-        import random
-        agent.runs_today = random.randint(5, 120)
-        agent.errors_today = random.randint(0, 5)
-        total = agent.runs_today
-        errors = agent.errors_today
-        agent.success_rate = round((total - errors) / total * 100, 1) if total else 100.0
-        agent.last_run_at = datetime.utcnow()
-        agent.status = status
-        agent.current_task = task
+        with Session(engine) as session:
+            db_agent = session.get(AgentDB, agent.agent_id)
+            if db_agent is None:
+                continue
+            db_agent.runs_today = random.randint(5, 120)
+            db_agent.errors_today = random.randint(0, 5)
+            total = db_agent.runs_today
+            errors = db_agent.errors_today
+            db_agent.success_rate = round((total - errors) / total * 100, 1) if total else 100.0
+            db_agent.last_run_at = datetime.utcnow()
+            db_agent.status = status.value
+            db_agent.current_task = task
+            db_agent.latency_ms = round(random.uniform(80, 2400), 1)
+            db_agent.events_total = random.randint(10, 500)
+            db_agent.anomalies_count = random.randint(0, 8)
+            db_agent.health_score = round(random.uniform(55, 100), 1)
+            session.add(db_agent)
+            session.commit()
