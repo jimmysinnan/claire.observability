@@ -1,8 +1,11 @@
+import os
 from collections.abc import Generator
 
 from sqlmodel import Session, SQLModel, create_engine
 
-engine = create_engine("sqlite:///./claire.db", connect_args={"check_same_thread": False})
+# CLAIRE_DB_PATH permet de pointer vers un volume persistant (ex: /data/claire.db sur Railway)
+_db_path = os.getenv("CLAIRE_DB_PATH", "./claire.db")
+engine = create_engine(f"sqlite:///{_db_path}", connect_args={"check_same_thread": False})
 
 
 def init_db() -> None:
