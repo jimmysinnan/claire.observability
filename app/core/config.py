@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     influxdb_bucket: str = "metrics"
     slack_webhook_url: str | None = None
     alert_email_recipient: str | None = None
+    otlp_endpoint: str | None = None  # ex: http://otel-collector:4317 — désactivé si absent
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="CLAIRE_")
 
